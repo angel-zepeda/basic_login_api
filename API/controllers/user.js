@@ -7,10 +7,9 @@ const jwt = require('../services/jwt');
 //MOSTRAR TODOS LOS USUARIOS
 function index(req, res) {
   User.find({}, (err, users) => {
-    res.status(200).send({
-      users
-    });
-  })
+    if (err) return res.status(500).send({ message: "Error en la petición" });
+    if (users) return res.status(200).send(users);
+  }).sort('_id')
 }
 
 /*CREATE User*/
@@ -102,14 +101,29 @@ function getUser(req, res) {
     if (!user) return res.status(404).send({ message: "El usuario no existe" });
     return res.status(200).send({ user });
   });
-
 }
+
+
+function update(req, res) {
+  var userId = req.params.id;
+  var update = req.body;
+  delete update.password;
+  if (userId != req.user.sub) {
+    return res.statu(500).send({ message: "No tienes permiso para acutalizar los datos del usuario" });
+  }
+  User.findByIdAndUpdate(userId, update, { new: true }, (err, userUpdated) => {
+    if (err) return res.statu(500).send({ message: "Error en la peticion" });
+    if (!userUpdated) return res.status(404).send({ message: "No se ha podido actualizar el usuario" })
+    if (userUpdated) return res.status(200).send({ user: userUpdated });
+  });
+}
+
 
 // exportacion de metodos
 module.exports = {
   index,
   create,
   loginUser,
-  getUser
-
+  getUser,
+  update
 }
