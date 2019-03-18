@@ -90,14 +90,26 @@ function loginUser(req, res) {
       res.status(404).send({ message: "El usuario no se ha podido indentificar" })
     }
   });
-
 }
 
+
+function getUser(req, res) {
+  var user_id = req.params.id; // ID por URL
+  User.findById(user_id, (err, user) => {
+    if (err) {
+      return res.status(500).send({ message: "Error en la petición" });
+    }
+    if (!user) return res.status(404).send({ message: "El usuario no existe" });
+    return res.status(200).send({ user });
+  });
+
+}
 
 // exportacion de metodos
 module.exports = {
   index,
   create,
-  loginUser
+  loginUser,
+  getUser
 
 }
